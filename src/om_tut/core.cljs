@@ -35,7 +35,7 @@
         (dom/button #js {:onClick (fn [e] (put! delete @contact))} "Delete")))))
 
 (defn contacts-view [app owner]
-  (let [alphasort (fn [] (om/transact! app :contacts #(vec (sort (fn [a b] (< (:last a) (:last b))) %))))]
+  (let [alphasort (fn [] (om/transact! app :contacts #(vec (sort (fn [{a :last}, {b :last}] (< a b)) %))))]
   (reify
     om/IInitState
     (init-state [_]
@@ -57,7 +57,6 @@
         (apply dom/ul nil
           (om/build-all contact-view (:contacts app)
           {:init-state {:delete delete}})))))))
-
 
 (om/root contacts-view app-state
   {:target (. js/document (getElementById "contacts"))})
