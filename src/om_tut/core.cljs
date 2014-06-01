@@ -36,18 +36,18 @@
 
 (defn contacts-view [app owner]
   (let [alphasort (fn [] (om/transact! app :contacts #(vec (sort (fn [{a :last}, {b :last}] (< a b)) %))))]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:delete (chan)})
-    om/IWillMount
-    (will-mount [_]
-      (let [delete (om/get-state owner :delete)]
-        (go (loop []
-          (let [contact (<! delete)]
-            (om/transact! app :contacts
-              (fn [xs] (vec (remove #(= contact %) xs))))
-            (recur))))))
+    (reify
+      om/IInitState
+      (init-state [_]
+        {:delete (chan)})
+      om/IWillMount
+      (will-mount [_]
+        (let [delete (om/get-state owner :delete)]
+          (go (loop []
+            (let [contact (<! delete)]
+              (om/transact! app :contacts
+                (fn [xs] (vec (remove #(= contact %) xs))))
+              (recur))))))
     om/IRenderState
     (render-state [this {:keys [delete]}]
       (dom/div nil
