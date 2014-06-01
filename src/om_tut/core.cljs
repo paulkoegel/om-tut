@@ -26,6 +26,14 @@
   (str last ", " first (middle-name contact))
 )
 
+(defn alphasort [xs]
+  (vec (sort (fn [a b] (< (:last a) (:last b))) xs))
+)
+
+(defn kabaaam []
+  (om/transact! app :contacts alphasort)
+)
+
 
 (defn contact-view [contact owner]
   (reify
@@ -35,8 +43,8 @@
         (dom/span nil (display-name contact))
         (dom/button #js {:onClick (fn [e] (put! delete @contact))} "Delete")))))
 
-
 (defn contacts-view [app owner]
+  (let [kabam (fn [] (om/transact! app :contacts alphasort))]
   (reify
     om/IInitState
     (init-state [_]
@@ -53,9 +61,11 @@
     (render-state [this {:keys [delete]}]
       (dom/div nil
         (dom/h2 nil "Contact list")
+        (dom/button #js {:onClick kabam}
+          "Sort by last name")
         (apply dom/ul nil
           (om/build-all contact-view (:contacts app)
-          {:init-state {:delete delete}}))))))
+          {:init-state {:delete delete}})))))))
 
 
 (om/root contacts-view app-state
