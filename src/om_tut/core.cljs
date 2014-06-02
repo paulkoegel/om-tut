@@ -39,6 +39,9 @@
 
 ;; (parse-contact "Gerald J. Sussman")
 
+(defn sort-by-last-name [app _]
+  (om/transact! app :contacts #(vec (sort (fn [{a :last}, {b :last}] (< a b)) %))))
+
 (defn add-contact [app owner]
   (let [new-contact (-> (om/get-node owner "new-contact")
                         .-value
@@ -58,12 +61,11 @@
         (dom/button #js {:onClick (fn [e] (put! delete @contact))} "Delete")))))
 
 (defn contacts-view [app owner]
-  (let [alphasort (fn [] (om/transact! app :contacts #(vec (sort (fn [{a :last}, {b :last}] (< a b)) %))))]
-    (reify
-      om/IInitState
+  (reify
+    om/IInitState
       (init-state [_]
         {:delete (chan)})
-      om/IWillMount
+    om/IWillMount
       (will-mount [_]
         (let [delete (om/get-state owner :delete)]
           (go (loop []
@@ -75,14 +77,14 @@
     (render-state [this {:keys [delete]}]
       (dom/div nil
         (dom/h2 nil "Contact list")
-        (dom/button #js {:onClick alphasort}
+        (dom/button #js {:onClick #(sort-by-last-name app owner)}
           "Sort by last name")
         (apply dom/ul nil
           (om/build-all contact-view (:contacts app)
             {:init-state {:delete delete}}))
         (dom/div nil
           (dom/input #js {:type "text" :ref "new-contact"})
-          (dom/button #js {:onClick #(add-contact app owner)} "Add contact")))))))
+          (dom/button #js {:onClick #(add-contact app owner)} "Add contact"))))))
 
 (om/root contacts-view app-state
   {:target (. js/document (getElementById "contacts"))})
