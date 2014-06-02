@@ -44,7 +44,10 @@
                         .-value
                         parse-contact)]
     (when new-contact
-      (om/transact! app :contacts #(conj % new-contact)))))
+      (do
+        (om/transact! app :contacts #(conj % new-contact))
+        (set! (.-value (om/get-node owner "new-contact")) nil) ; reset the input
+        ))))
 
 (defn contact-view [contact owner]
   (reify
