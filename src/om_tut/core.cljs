@@ -40,7 +40,7 @@
 ;; (parse-contact "Gerald J. Sussman")
 
 (defn sort-by-last-name [app _]
-  (om/transact! app :contacts #(vec (sort (fn [{a :last}, {b :last}] (< a b)) %))))
+  (om/transact! app :contacts #(vec (sort (fn [{a :last}, {b :last}] #_(js/console.log a b) (< (string/lower-case a) (string/lower-case b))) %))))
 
 (defn add-contact [app owner]
   (let [new-contact (-> (om/get-node owner "new-contact")
